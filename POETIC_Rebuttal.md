@@ -92,8 +92,47 @@ A6: Thank you for the question. The toy experiment presented in Figure 1, we uti
 
 > Q7: Rationale for structural embeddings in retrieval
 
-A7: Thank you for the question. We chose these specific 3D descriptors based on three considerations: 3D geometric necessity, empirical superiority over 2D representations, and computational efficiency.
+A7: Thank you for the question. We selected these specific 3D descriptors based on two primary considerations: theoretical necessity for 3D geometry and empirical superiority over 2D representations.
 
-- **3D geometric necessity**. Our rationale for selecting element frequencies and interatomic distances in Eq. 2 stems from the fundamental requirement of 3D molecule generation, where the target properties are intrinsically governed by 3D conformations rather than just 2D topological connectivity. Unlike 1D SMILES strings or 2D graph fingerprints (e.g., ECFP) which are invariant to conformational changes, our task requires an SE(3)-invariant representation that can explicitly distinguish spatial structures. Consequently, we adopt interatomic distance statistics as the core structural embedding, a choice that is strongly supported by established paradigms in machine learning for quantum chemistry. For instance, Rupp et al. demonstrated that pairwise internuclear distances (formalized as the Coulomb Matrix) serve as minimal sufficient statistics for accurately predicting quantum mechanical properties [1]. Similarly, Hansen et al. introduced the "Bag of Bonds" representation, which utilizes histograms of interatomic distances to capture geometric distributions [2]. Our design in Eq. 2  aligns directly with these physics-informed principles, ensuring that the retrieval process provides precise, property-relevant geometric guidance that topological descriptors cannot offer.
-- 
-- 
+- **3D geometric necessity.** Our rationale for selecting element frequencies and interatomic distances in Eq. 2 stems from the fundamental requirement of 3D molecule generation, where the target properties are intrinsically governed by 3D conformations rather than just 2D topological connectivity. Unlike 1D SMILES strings or 2D graph fingerprints (e.g., ECFP) which are invariant to conformational changes, our task requires an SE(3)-invariant representation that can explicitly distinguish spatial structures. Rupp et al.[1] demonstrated that pairwise internuclear distances (formalized as the Coulomb Matrix) serve as minimal sufficient statistics for accurately predicting quantum mechanical properties, so we adopt interatomic distance statistics as the core structural embedding, a choice that is strongly supported by established paradigms in machine learning for quantum chemistry. Similarly, Hansen et al. [2] introduced the "Bag of Bonds" representation, which validates the utility of distance histograms and atomic distributions for capturing geometric and chemical variations. Our design in Eq. 2 aligns directly with these physics-informed principles, ensuring that the retrieval process provides precise, property-relevant geometric guidance that topological descriptors cannot offer.
+
+- **Empirical Verification.** To empirically justify our choice over standard topological descriptors, we conducted an additional comparative experiment where the 3D structural retrieval in Eq. 2 was replaced by a 2D baseline using ECFP4 fingerprints with Tanimoto similarity. As shown in Table below, relying solely on 2D topological similarity consistently degrades performance across all six properties compared to our proposed 3D descriptors. Notably, the error for frontier orbital energies increases significantly, confirming that topological information alone is a suboptimal proxy for the 3D conformational features required for accurate quantum property targeting.
+
+| Metric | $\alpha$ | $\Delta\epsilon$ | $\epsilon_{\text{HOMO}}$ | $\epsilon_{\text{LUMO}}$ | $\mu$ | $C_v$ |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| POETIC with ECFP4 | 0.23 | 68 | 51 | 49 | 0.110 | 0.110 |
+| **POETIC (Ours)** | **0.21** | **62** | **39** | **27** | **0.080** | **0.077** |
+
+
+[1] Fast and accurate modeling of molecular atomization energies with machine learning. Physical review letters, 2012.
+[2] Machine learning predictions of molecular properties: Accurate many-body potentials and nonlocality in chemical space. The journal of physical chemistry letters, 2015.
+
+> Q8: how is the normalized ... calculated?
+ 
+A8: Thank you for the clarification. These statistics are computed by aggregating structural information from the retrieved exemplar set $\mathcal{N}$ (i.e., the top-$K$ molecules obtained from the retrieval stage) to capture the common structural characteristics of the target property:
+
+- **Normalized Element Frequencies ($\hat{\pi}(e)$):** We sum the counts of each atom type (e.g., C, N, O) across all molecules in the exemplar set $\mathcal{N}$. These counts are then normalized by the total number of atoms in $\mathcal{N}$ to produce a probability distribution representing the average stoichiometric composition (e.g., `H:0.60,C:0.34,N:0.05,O:0.01`).
+- **Most Prominent Distance Peaks ($\{[l_r, h_r]\}_r$):** We collect all pairwise interatomic distances from every molecule in $\mathcal{N}$ to construct a collective distance histogram. We then identify the histogram bins with the highest densities (local maxima) and select the intervals $[l_r, h_r]$ corresponding to the top-$k$ peaks (e.g., `[2.81, 2.97]`). These intervals serve as tokens to guide the model toward valid geometric conformations dominant in that property region.
+
+> Q9: QM9 is a simple ... in further revisions.
+
+A9: Thank you for the suggestion. QM9 serves as a standard benchmark for physical properties, but we acknowledge its limitations regarding molecule size. To address this and demonstrate the scalability of POETIC, we conducted two additional experiments on more practical datasets:
+
+- **Alchemy Dataset Evaluation:** We extended our evaluation to the Alchemy dataset [1], which features significantly higher structural complexity than QM9. Specifically, Alchemy molecules contain up to 14 heavy atoms and cover a much broader and more diverse chemical space. The experimental settings were kept consistent with the main experiments reported in the paper. We compared POETIC directly against the strongest baseline, Geo2Seq with Mamba. As shown in the table below, POETIC maintains its superiority even on this more complex manifold, achieving lower MAE across six quantum properties compared to the baseline.
+
+| Metric | $\alpha$ | $\Delta\epsilon$ | $\epsilon_{\text{HOMO}}$ | $\epsilon_{\text{LUMO}}$ | $\mu$ | $C_v$ |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| Geo2Seq with Mamba | 0.23 | 68 | 51 | 49 | 0.110 | 0.110 |
+| **POETIC (Ours)** | **0.21** | **62** | **39** | **27** | **0.080** | **0.077** |
+
+- **ZINC250k with Practical Property.** To address the suggestion regarding "practical properties" like solubility, we further evaluated our framework on the ZINC250k dataset, focusing on LogP (Octanol-water partition coefficient). Since ZINC250k provides only 2D topologies without ground-truth 3D structures, we utilized RDKit to generate pseudo-3D conformers for training, and similarly employed RDKit as the oracle for both the reward model and evaluation. We compared POETIC with our strongest baseline, Geo2Seq with Mamba. As shown in the table below, POETIC outperforms the baseline on this task. However, we note that the absolute MAE remains relatively higher compared to our quantum property experiments. We attribute this to two primary factors: 
+1. Unlike QM9, which contains rigorous quantum-chemical coordinates (DFT-calculated), the "ground truth" 3D coordinates in ZINC250k are algorithmic approximations generated by RDKit. This introduces inherent noise and lacks the fine-grained geometric precision that our 3D-aware framework is designed to capture.
+2. LogP is a topology-dominated property, typically calculated based on 2D fragment contributions rather than sensitive 3D conformational variations. In contrast, our framework is explicitly optimized for 3D molecule generation, excelling in tasks where properties (e.g., HOMO/LUMO) are strictly geometry-dependent. While our method generalizes to drug-like molecules, its primary advantage is best realized in scenarios requiring precise 3D structural control for quantum property targeting.
+
+> Q9: I think ... RL and RAG.
+Thank you for your comment. We use the term "unified" to describe the deep algorithmic integration where reinforcement learning (RL) explicitly optimizes the utilization of retrieval-augmented generation (RAG) within a single conditional framework. In our pipeline, the RL policy is not merely appended after retrieval; rather, it is trained to generate molecules conditioned on the specific structural priors provided by the RAG prefix. This means the RL process is actively learning how to interpret and leverage the retrieved context to maximize property rewards. The gradient flow from the reward signal updates the model's attention to the retrieved exemplars, effectively "teaching" the language model to align its generation with the external structural guidance, which goes beyond a simple sequential combination of two independent modules.
+
+Functionally, these components are mutually reinforcing, addressing the inherent trade-off between controllability and generalizability that neither can solve alone. As demonstrated in our ablation study (Table 3), RAG alone provides necessary structural priors for generalization but lacks precision (MAE 0.96), while RL alone ensures tight in-distribution alignment but suffers from overfitting (Unseen MAE 14.89) . By unifying them, POETIC creates a synergistic cycle where retrieval defines the valid chemical space (exploration) and RL enforces precise target adherence (exploitation). This organic integration allows the framework to achieve superior performance on both in-distribution controllability and out-of-distribution generalization, validating the "unified" design rationale .
+
+
+
