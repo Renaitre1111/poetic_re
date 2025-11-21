@@ -111,7 +111,7 @@ A7: Thank you for the question. We selected these specific 3D descriptors based 
  
 A8: Thank you for the clarification. These statistics are computed by aggregating structural information from the retrieved exemplar set $\mathcal{N}$ (i.e., the top-$K$ molecules obtained from the retrieval stage) to capture the common structural characteristics of the target property:
 
-- **Normalized Element Frequencies ($\hat{\pi}(e)$):** We sum the counts of each atom type (e.g., C, N, O) across all molecules in the exemplar set $\mathcal{N}$. These counts are then normalized by the total number of atoms in $\mathcal{N}$ to produce a probability distribution representing the average stoichiometric composition (e.g., `H:0.60,C:0.34,N:0.05,O:0.01`).
+- **Normalized Element Frequencies ($\\hat{\pi}(e)$):** We sum the counts of each atom type (e.g., C, N, O) across all molecules in the exemplar set $\mathcal{N}$. These counts are then normalized by the total number of atoms in $\mathcal{N}$ to produce a probability distribution representing the average stoichiometric composition (e.g., `H:0.60,C:0.34,N:0.05,O:0.01`).
 - **Most Prominent Distance Peaks ($\{[l_r, h_r]\}_r$):** We collect all pairwise interatomic distances from every molecule in $\mathcal{N}$ to construct a collective distance histogram. We then identify the histogram bins with the highest densities (local maxima) and select the intervals $[l_r, h_r]$ corresponding to the top-$k$ peaks (e.g., `[2.81, 2.97]`). These intervals serve as tokens to guide the model toward valid geometric conformations dominant in that property region.
 
 > Q9: QM9 is a simple ... in further revisions.
