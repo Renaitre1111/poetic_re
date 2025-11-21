@@ -54,9 +54,11 @@ The specific MAE performance of the predictor (the "Data" baseline) is listed be
 | Metric | $\alpha$ ($\text{Bohr}^3$) | $\Delta\epsilon$ (meV) | $\epsilon_{\text{HOMO}}$ (meV) | $\epsilon_{\text{LUMO}}$ (meV) | $\mu$ (D) | $C_v$ ($\frac{\text{cal}}{\text{mol K}}$) |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
 | **Predictor MAE** | 0.10 | 64 | 39 | 36 | 0.043 | 0.040 |
+
 These results confirm that the predictor provides accurate guidance for the reinforcement learning process and serves as a reliable metric for evaluation.
 
 [1] EDM: Equivariant diffusion for molecule generation in 3d. ICML 2022.
+
 
 > Q4: why a Mamba model is used, instead a regular transformer model?
 
@@ -70,6 +72,7 @@ A4: Thank you for this insightful question. Initially, we selected the Mamba arc
 As the results demonstrate, the Mamba-based model significantly outperforms the GPT variant across all six properties. We attribute this superiority to Mamba's efficiency in long-sequence modeling. In our framework, the combination of coordinate-level tokens and detailed RAG prefixes results in extended sequence lengths. Mamba's State Space Model (SSM) architecture captures the complex, long-range dependencies inherent in these 3D geometric sequences more effectively than the standard attention mechanism used in GPT, leading to more precise structural generation and property alignment.
 
 > Q5: how are the six properties picked for QM9 dataset?
+
 Thank you for the question regarding our evaluation metrics. We selected these specific six quantum properties ($\alpha$, $\Delta\epsilon$, $\epsilon_{\text{HOMO}}$, $\epsilon_{\text{LUMO}}$, $\mu$, $C_v$) based on two primary considerations:
 
 - First, we strictly followed the standard evaluation protocol established by the prior works (EDM [1], GeoLDM [2], Geo2Seq [3]). Utilizing this standardized set of properties ensures that our results are directly comparable with the state-of-the-art, providing a fair and rigorous assessment of our method's contribution.
