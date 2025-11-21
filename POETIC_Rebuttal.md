@@ -54,13 +54,15 @@ To ensure a rigorous and fair evaluation, we followed the **EDM protocol** (Hoog
 **Quantitative Performance:**
 The specific MAE performance of the predictor (the "Data" baseline) is listed below:
 
-| Metric            | $\alpha$ ($\text{Bohr}^3$) | $\Delta\epsilon$ (meV) | $\epsilon_{\text{HOMO}}$ (meV) | $\epsilon_{\text{LUMO}}$ (meV) | $\mu$ (D) | $C_v$ ($\frac{\text{cal}}{\text{mol K}}$) |
-|:----------------- |:--------------------------:|:----------------------:|:------------------------------:|:------------------------------:|:---------:|:-----------------------------------------:|
-| **Predictor MAE** | 0.10                       | 64                     | 39                             | 36                             | 0.043     | 0.040                                     |
+| Metric | $\alpha$ ($\text{Bohr}^3$) | $\Delta\epsilon$ (meV) | $\epsilon_{\text{HOMO}}$ (meV) | $\epsilon_{\text{LUMO}}$ (meV) | $\mu$ (D) | $C_v$ ($\frac{\text{cal}}{\text{mol K}}$) |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Predictor MAE** | 0.10 | 64 | 39 | 36 | 0.043 | 0.040 |
+>>>>>>> 5c9ee5e1e8498bd12c83b1a9817a57f13f0eff31
 
 These results confirm that the predictor provides accurate guidance for the reinforcement learning process and serves as a reliable metric for evaluation.
 
 [1] EDM: Equivariant diffusion for molecule generation in 3d. ICML 2022.
+
 
 > Q4: why a Mamba model is used, instead a regular transformer model?
 
