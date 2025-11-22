@@ -157,6 +157,7 @@ This progression from "compact" to "extended" perfectly aligns with physical int
 > Q12: Additional qualitative study ... actually generated molecules.
 
 A12: Thank you for the suggestion. To visually demonstrate the controllability and novelty of POETIC, we conducted a qualitative study covering three diverse quantum properties: Polarizability ($\alpha$), HOMO-LUMO Gap ($\Delta\epsilon$), and Dipole Moment ($\mu$). For each property, we randomly sampled two target values from the training set. The table below presents:
+
 | Target Property | Reference Molecule ｜ Generated Molecule ｜ Predicted Property |
 | :--- | :---: | :---: | :---: |
 | $\alpha$=57.35 | CC(C)CC(F)(F)F | O=C[C@@H]1C[C@@H]1C=O | 57.32 |
