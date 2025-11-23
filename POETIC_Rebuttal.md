@@ -202,6 +202,7 @@ A2: Thank you for your question. We respectfully clarify that our comparisons ar
 2. Verification via Baseline Reproduction. To empirically verify this and address the concern about potential data mismatch, we re-trained and re-evaluated the primary baselines (EDM and GeoLDM) using our exact codebase and data partitions. The comparison between the numbers reported in the original papers and our reproduction is shown below:
 
 | Method | $\alpha$ | $\Delta\epsilon$ | $\epsilon_{\text{HOMO}}$ | $\epsilon_{\text{LUMO}}$ | $\mu$ | $C_v$ |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
 | EDM | 2.76 | 655 | 356 | 584 | 1.11 | 1.10 |
 | Our Reproduction | 2.79 | 648 | 352 | 591 | 1.13 | 1.09 |
 | GeoLDM | 2.37 | 587 | 340 | 522 | 1.11 | 1.03 |
@@ -222,6 +223,7 @@ A3: Thank you for your question. To prove that our improvements stem from genuin
 The results of POETIC w/ SchNet Reward compared to the baselines are presented below:
 
 | Method | $\alpha$ | $\Delta\epsilon$ | $\epsilon_{\text{HOMO}}$ | $\epsilon_{\text{LUMO}}$ | $\mu$ | $C_v$ |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
 | EDM | 2.76 | 655 | 356 | 584 | 1.11 | 1.10 |
 | GeoLDM | 2.37 | 587 | 340 | 522 | 1.11 | 1.03 |
 | NExT-Mol | 1.16 | 297 | 205 | 235 | 0.507 | 0.512 | 
