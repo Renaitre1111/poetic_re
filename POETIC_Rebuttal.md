@@ -7,7 +7,7 @@ Rebuttal: POETIC
 
 R1: Reviewer 9M95
 
-We sincerely appreciate the time and effort you dedicated to reviewing our paper. In the following response, we aim to address your main concern and provide further clarification.
+We sincerely appreciate your comprehensive review and valuable suggestions. Your detailed questions have significantly helped us clarify our experimental settings and strengthen the paper. We have addressed your concerns point-by-point below and are happy to provide further details if you have any additional questions.
 
 > Q1: Range of property values
 
@@ -90,11 +90,11 @@ Thank you for the question regarding our evaluation metrics. We selected these s
 
 A6: Thank you for the question. The toy experiment presented in Figure 1, we utilized the QM9 dataset, consistent with the setup in our main experiments. Specifically, we focused on the property of Polarizability ($\alpha$). To efficiently verify the feasibility of the proposed framework, we evaluated the models on a subset of 200 target property values for the in-distribution and unseen settings, respectively.
 
-> Q7: Rationale for structural embeddings in retrieval
+> Q7: Rationale for structural embeddings in retrieval.
 
 A7: Thank you for the question. We selected these specific 3D descriptors based on two primary considerations: theoretical necessity for 3D geometry and empirical superiority over 2D representations.
 
-- **3D geometric necessity.** Our rationale for selecting element frequencies and interatomic distances in Eq. 2 stems from the fundamental requirement of 3D molecule generation, where the target properties are intrinsically governed by 3D conformations rather than just 2D topological connectivity. Unlike 1D SMILES strings or 2D graph fingerprints (e.g., ECFP) which are invariant to conformational changes, our task requires an SE(3)-invariant representation that can explicitly distinguish spatial structures. Rupp et al.[1] demonstrated that pairwise internuclear distances (formalized as the Coulomb Matrix) serve as minimal sufficient statistics for accurately predicting quantum mechanical properties, so we adopt interatomic distance statistics as the core structural embedding, a choice that is strongly supported by established paradigms in machine learning for quantum chemistry. Similarly, Hansen et al. [2] introduced the "Bag of Bonds" representation, which validates the utility of distance histograms and atomic distributions for capturing geometric and chemical variations. Our design in Eq. 2 aligns directly with these physics-informed principles, ensuring that the retrieval process provides precise, property-relevant geometric guidance that topological descriptors cannot offer.
+- **3D geometric necessity.** Our rationale for selecting element frequencies and interatomic distances in Eq. 2 stems from the fundamental requirement of 3D molecule generation, where the target properties are intrinsically governed by 3D conformations rather than just 2D topological connectivity. Unlike 1D SMILES strings or 2D graph fingerprints (e.g., ECFP) which are invariant to conformational changes, our task requires an SE(3)-invariant representation that can explicitly distinguish spatial structures. [1] demonstrated that pairwise internuclear distances (formalized as the Coulomb Matrix) serve as minimal sufficient statistics for accurately predicting quantum mechanical properties, so we adopt interatomic distance statistics as the core structural embedding, a choice that is strongly supported by established paradigms in machine learning for quantum chemistry. Similarly, [2] introduced the "Bag of Bonds" representation, which validates the utility of distance histograms and atomic distributions for capturing geometric and chemical variations. Our design in Eq. 2 aligns directly with these physics-informed principles, ensuring that the retrieval process provides precise, property-relevant geometric guidance that topological descriptors cannot offer.
 
 - **Empirical Verification.** To empirically justify our choice over standard topological descriptors, we conducted an additional comparative experiment where the 3D structural retrieval in Eq. 2 was replaced by a 2D baseline using ECFP4 fingerprints with Tanimoto similarity. As shown in Table below, relying solely on 2D topological similarity consistently degrades performance across all six properties compared to our proposed 3D descriptors. Notably, the error for frontier orbital energies increases significantly, confirming that topological information alone is a suboptimal proxy for the 3D conformational features required for accurate quantum property targeting.
 
@@ -108,14 +108,14 @@ A7: Thank you for the question. We selected these specific 3D descriptors based 
 
 [2] Machine learning predictions of molecular properties: Accurate many-body potentials and nonlocality in chemical space. The journal of physical chemistry letters, 2015.
 
-> Q8: how is the normalized ... calculated?
+> Q8: Normalized element frequencies and the most prominent distance peaks calculation.
  
 A8: Thank you for the clarification. These statistics are computed by aggregating structural information from the retrieved exemplar set $\mathcal{N}$ (i.e., the top-$K$ molecules obtained from the retrieval stage) to capture the common structural characteristics of the target property:
 
 - **Normalized Element Frequencies:** We sum the counts of each atom type (e.g., C, N, O) across all molecules in the exemplar set $\mathcal{N}$. These counts are then normalized by the total number of atoms in $\mathcal{N}$ to produce a probability distribution representing the average stoichiometric composition (e.g., `H:0.60,C:0.34,N:0.05,O:0.01`).
 - **Most Prominent Distance Peaks ($\{[l_r, h_r]\}_r$):** We collect all pairwise interatomic distances from every molecule in $\mathcal{N}$ to construct a collective distance histogram. We then identify the histogram bins with the highest densities (local maxima) and select the intervals $[l_r, h_r]$ corresponding to the top-$k$ peaks (e.g., `[2.81, 2.97]`). These intervals serve as tokens to guide the model toward valid geometric conformations dominant in that property region.
 
-> Q9: QM9 is a simple ... in further revisions.
+> Q9: More practical property evaluation.
 
 A9: Thank you for the suggestion. QM9 serves as a standard benchmark for physical properties, but we acknowledge its limitations regarding molecule size. To address this and demonstrate the scalability of POETIC, we conducted two additional experiments on more practical datasets:
 
@@ -142,7 +142,7 @@ As shown in the table below, POETIC outperforms the baseline on this task. Howev
 
 [2] ZINC 15 – Ligand Discovery for Everyone. Journal of Chemical Information and Modeling (JCIM), 2015.
 
-> Q10: I think the proposed method ... RL and RAG.
+> Q10: Unified framework for RL and RAG.
 
 A10: Thank you for your comment. We use the term "unified" to describe the deep algorithmic integration where reinforcement learning (RL) explicitly optimizes the utilization of retrieval-augmented generation (RAG) within a single conditional framework. In our pipeline, the RL policy is not merely appended after retrieval; rather, it is trained to generate molecules conditioned on the specific structural priors provided by the RAG prefix. This means the RL process is actively learning how to interpret and leverage the retrieved context to maximize property rewards. The gradient flow from the reward signal updates the model's attention to the retrieved exemplars, effectively "teaching" the language model to align its generation with the external structural guidance, which goes beyond a simple sequential combination of two independent modules.
 
@@ -157,7 +157,7 @@ As observed in Fig. 4:
 
 This progression from "compact" to "extended" perfectly aligns with physical intuition. It confirms that POETIC has successfully learned the complex, non-linear mapping between continuous quantum properties and 3D structural distributions, rather than generating random conformers.
 
-> Q12: Additional qualitative study ... actually generated molecules.
+> Q12: Additional qualitative study.
 
 A12: Thank you for the suggestion. To visually demonstrate the controllability and novelty of POETIC, we conducted a qualitative study covering three diverse quantum properties: Polarizability ($\alpha$), HOMO-LUMO Gap ($\Delta\epsilon$), and Dipole Moment ($\mu$). For each property, we randomly sampled two target values from the training set. The table below presents:
 
@@ -173,6 +173,8 @@ A12: Thank you for the suggestion. To visually demonstrate the controllability a
 This table lists randomly selected target property values (Desired) alongside the actually generated molecules (converted to SMILES for readability) and their predicted properties. As observed, the generated molecules exhibit properties that align precisely with the target values across different attributes (e.g., $\alpha$, $\mu$, $\epsilon_{\text{HOMO}}$). This offers concrete evidence that POETIC effectively translates specific numerical constraints into valid, property-matched chemical structures.
 
 R2: Reviewer iroE
+
+We are grateful for your insightful comments, particularly regarding the framework's design and scalability. Your feedback has been instrumental in improving the clarity and robustness of our work. We hope our response resolves your concerns, and we welcome any further discussion during the rebuttal period.
 
 > Q1: Results for RAG-only and RL-only baselines.
 
@@ -192,7 +194,7 @@ As shown in the table, RAG and RL play distinct yet complementary roles:
 
 This demonstrates that RAG and RL are not merely additive but synergistic: RAG provides the necessary "structural scaffold" for generalization, allowing RL to safely optimize for precision without catastrophic overfitting.
 
-> Q2: In the RAG stage, have you considered ... similarity and diversity?
+> Q2: Clustering-based or diversity-aware retrieval methods.
 
 A2: Thank you for your insightful suggestion. We agree that clustering-based retrieval is an interesting direction. In this work, we adopted the "Prototype-based" retrieval strategy primarily to reduce variance in the conditioning signal and ensure high-fidelity guidance, based on the following considerations:
 
@@ -313,7 +315,9 @@ This structured graph object $(h, x, \text{edges}, \text{mask})$ is then directl
 
 R3: Reviewer Gm3J
 
-> Q1: The evaluation focuses almost entirely on property controllability... There is no systematic assessment of the generated 3D conformations.
+We thank you for your critical and constructive feedback, especially for highlighting the importance of geometric fidelity and baseline fairness. These comments have motivated us to conduct a more systematic assessment to strengthen our claims. We have addressed your concerns point-by-point below.
+
+> Q1: More systematic assessment of the generated 3D conformations.
 
 A1: Thank you for your suggestion. We have performed a systematic assessment of the 3D geometries generated by POETIC across all six benchmark properties.
 
