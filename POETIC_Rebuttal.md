@@ -124,8 +124,8 @@ A9: Thank you for the suggestion. QM9 serves as a standard benchmark for physica
 | Method | $\alpha$ | $\Delta\epsilon$ | $\epsilon_{\text{HOMO}}$ | $\epsilon_{\text{LUMO}}$ | $\mu$ | $C_v$ |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
 | data | 0.18 | 60 | 39 | 38 | 0.056 | 0.117 |
-| Geo2Seq with Mamba | 1.85 | 445 | 603 | 296 | 0.603 | 0.110 |
-| **POETIC (Ours)** | **1.32** | **162** | **155** | **66** | **0.167** | **0.077** |
+| Geo2Seq with Mamba | 1.85 | 445 | 603 | 296 | 0.603 | 3.27 |
+| **POETIC (Ours)** | **1.32** | **162** | **155** | **66** | **0.167** | **1.54** |
 
 - **ZINC250k with Practical Property.** To address the suggestion regarding "practical properties" like solubility, we further evaluated our framework on the ZINC250k dataset [2], focusing on LogP (Octanol-water partition coefficient). Since ZINC250k provides only 2D topologies without ground-truth 3D structures, we utilized RDKit to generate pseudo-3D conformers for training, and similarly employed RDKit as the oracle for both the reward model and evaluation. We compared POETIC with our strongest baseline, Geo2Seq with Mamba. 
 
@@ -203,7 +203,14 @@ Therefore, our choice was to prioritize the quality and consistency of the retri
 
 > Q3: The diversity metric of generated molecules.
 
-A3: 
+A3: Thank you for your question. We evaluated the Novelty of POETIC across all six properties and compared it with the strong baseline Geo2Seq. The results are summarized in the table below:
+
+| Method | $\alpha$ | $\Delta\epsilon$ | $\epsilon_{\text{HOMO}}$ | $\epsilon_{\text{LUMO}}$ | $\mu$ | $C_v$ |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| Geo2Seq | 83.5 | 80.2 | 81.5 | 81.3 | 80.9 | 81.2 |
+| POETIC | 80.5 | 70.1 | 76.7 | 81.8 | 81.8 | 76.6 |
+
+As shown in the table, POETIC maintains competitive novelty (mostly around 76%-81%) while achieving state-of-the-art controllability.
 
 > Q4: Using a frozen EGNN property predictor and a fine-tuned version.
 
@@ -219,8 +226,8 @@ A5: Thank you for your question. We agree that verifying performance on larger a
 | Method | $\alpha$ | $\Delta\epsilon$ | $\epsilon_{\text{HOMO}}$ | $\epsilon_{\text{LUMO}}$ | $\mu$ | $C_v$ |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
 | data | 0.18 | 60 | 39 | 38 | 0.056 | 0.117 |
-| Geo2Seq with Mamba | 1.85 | 445 | 603 | 296 | 0.603 | 0.110 |
-| **POETIC (Ours)** | **1.32** | **162** | **155** | **66** | **0.167** | **0.077** |
+| Geo2Seq with Mamba | 1.85 | 445 | 603 | 296 | 0.603 | 3.27 |
+| **POETIC (Ours)** | **1.32** | **162** | **155** | **66** | **0.167** | **1.54** |
 
 These results confirm that POETIC effectively scales to larger datasets and handles increased structural complexity without compromising controllable generation performance.
 
@@ -242,16 +249,89 @@ All continuous values are quantized into discrete tokens with two-decimal precis
 
 > Q7: How are bond (edge) connections predicted and reconstructed in the generation process?
 
-A7: 
+A7: Thank you for your question. In our POETIC framework, the model focuses on generating the 3D geometry (atom types and coordinates) rather than explicitly predicting the topological connectivity (edges/bonds) as discrete tokens.Specifically, the bond reconstruction process follows the standard protocol used in 3D molecule generation (EDM [1], GeoLDM [2], Geo2Seq [3]):
 
+1. **Coordinate Generation:** The model first autoregressively generates the atom types and their 3D positions (derived from the spherical coordinate tokens described in the previous response).
 
+2. **Bond Inference:** Once the full 3D point cloud is generated, bond connections are deterministically reconstructed using standard cheminformatics libraries (specifically RDKit). Connectivity is determined based on atomic pairwise distances: a bond is assigned between two atoms if their Euclidean distance falls within the sum of their respective covalent radii (plus a standard tolerance margin).
+
+This approach ensures that the topology is naturally derived from the generated geometry, guaranteeing that the defined bonds are consistent with the physical 3D structure.
+
+[1] EDM: Equivariant diffusion for molecule generation in 3d. ICML 2022.
+
+[2] GEOLDM: Geometric Latent Diffusion Models for 3D Molecule Generation. ICML 2023.
+
+[3] Geo2Seq: Geometry Informed Tokenization of Molecules for Language Model Generation. ICML 2025.
+
+> Q8: What is the composition and size of the RAG database used for retrieval?
+
+A8: Thank you for your question. we partitioned the QM9 training set (100K) into two disjoint halves. The retrieval database consists exclusively of the second half ($\sim$ 50,000 molecules), which matches the training data of the generative model. For the additional Alchemy experiments mentioned in our previous response, we followed the same protocol: the retrieval database was constructed solely from the Alchemy training split, ensuring consistency in our experimental design.
+
+> Q9: Have you visualized or analyzed the embedding-space trajectory to illustrate how generated molecules evolve toward target properties?
+
+A9: Thank you for your insightful suggestion. We have performed the requested visualization to illustrate the impact of RL on the model's latent space. In Appendix F (Figure 6) of the revised PDF, we compare the embedding spaces of the MLE baseline and our POETIC model using PCA projection. Specifically, we sampled 100 conditions for the HOMO-LUMO gap property and extracted the final hidden states of the generated molecules.
+As illustrated in Figure 6:
+- MLE Baseline (Left): The latent space appears disordered, with high-value (yellow) and low-value (purple) samples intermixed randomly. This indicates that the supervised baseline struggles to encode continuous property magnitudes in its representation.
+- POETIC (Right): After property-aware RL fine-tuning, a structured property manifold emerges. We observe a clear separation and gradient where molecules are clustered by their property values (e.g., low-value samples distinct from high-value ones).
+
+This visualization confirms that our RL mechanism successfully reshapes the semantic space of the language model, aligning the geometric distance in the embedding space with the actual physical property values.
+
+> Q10: During testing, is only the target property value used as input, or is molecular information also provided?
+
+A10: Thank you for your question. During the testing/inference phase, the only external input provided to the system is the target property value ($s^*$). No ground-truth molecular structural information is provided.The generation process proceeds as follows, as described in Section 3.4 (Molecule Sampling) 
+1. Input: The user provides a single scalar target property $s^*$.
+
+2. Automated Retrieval: The system uses $s^*$ to query the retrieval database (constructed from the training set) and selects the top-$k$ property-matched exemplars.
+
+3. Prefix Construction: The system automatically extracts structural statistics (element frequencies and distance peaks) from these retrieved exemplars and combines them with $s^*$ to form the context prefix. 
+
+4. Generation: The Language Model takes this constructed prefix as the initial context and autoregressively generates the new molecule's structure token by token.
+
+Thus, while the model utilizes molecular information (in the form of retrieved priors) to guide generation, this information is automatically derived from the database based on the property target, not manually provided as ground truth.
+
+> Q11: Could you explain in more detail how the outputs of the Mamba model are converted into EGNN graph inputs?
+
+A11: Thank you for your question. The conversion process follows a deterministic pipeline consisting of sequence parsing, coordinate transformation, and graph construction.
+1. **Sequence Parsing & Decoding:** The Mamba model outputs a sequence of discrete tokens representing atoms and their quantized spherical coordinates $(d, \theta, \phi)$. We first decode these tokens back into continuous numerical values. The atom type tokens (e.g., C, N, O) are converted into one-hot encoded vectors to serve as initial node features $h_0$.
+
+2. **Coordinate Transformation (Spherical to Cartesian):** The decoded spherical coordinates for each atom $i$ are transformed into 3D Cartesian coordinates $x_i \in \mathbb{R}^3$ using the standard conversion formulas:
+$$\begin{aligned}
+x &= d \cdot \sin(\theta) \cdot \cos(\phi) \\
+y &= d \cdot \sin(\theta) \cdot \sin(\phi) \\
+z &= d \cdot \cos(\theta)
+\end{aligned}$$
+This step reconstructs the precise 3D point cloud of the molecule.
+
+3. **Graph Construction for EGNN:** To prepare the input for the EGNN (which is an E(n)-Equivariant Graph Neural Network), we construct a fully connected graph based on the reconstructed geometry:
+- **Nodes ($h$):** The one-hot atom features.
+- **Coordinates ($x$):** The computed Cartesian positions.
+- **Edges:** We assume a fully connected topology where every atom interacts with every other atom (consistent with the EGNN architecture used in standard benchmarks).
+- **Masking:** Since molecules have variable sizes, we apply node masks and edge masks to pad the batches efficiently.
+
+This structured graph object $(h, x, \text{edges}, \text{mask})$ is then directly fed into the frozen EGNN to predict the molecular properties.
 
 
 R3: Reviewer Gm3J
 
-> Q1: 
+> Q1: The evaluation focuses almost entirely on property controllability... There is no systematic assessment of the generated 3D conformations.
 
-A1:
+A1: Thank you for your suggestion. We have performed a systematic assessment of the 3D geometries generated by POETIC across all six benchmark properties.
+
+- **Quantitative Assessment:** Structural Stability & Validity We evaluated standard 3D metrics including Atom Stability, Molecule Stability, Validity, and 3D FCD for molecules generated under each property condition. As shown in the table below, POETIC achieves consistently high performance, with an average Atom Stability of 96.54% and Molecule Stability of 85.15%.
+
+| Condition Property | Atom Stab. (%),Mol Stab. (%),Validity (%),3D FCD ↓ |
+| :--- | :---: | :---: | :---: |
+| $\alpha$ | 96.92 | 85.88 | 93.59 | 0.38 |
+| $\Delta\epsilon$ | 95.12 | 81.94 | 91.61 | 1.55 |
+| $\epsilon_{\text{HOMO}}$ | 95.84 | 83.75 | 90.99 | 2.24 |
+| $\epsilon_{\text{LUMO}}$ | 95.79 | 79.46 | 88.22 | 1.39 |
+| $\mu$ | 97.41 | 89.22 | 94.35 | 0.50 |
+| $C_v$ | 98.14 | 90.67 | 95.44 | 0.40 |
+
+- **Qualitative Assessment: Geometric Distributions:** To further verify geometric plausibility, we visualized the bond length and bond angle distributions. Please refer to Appendix H (Figure 7) in the revised paper. The plots show that POETIC accurately reproduces the characteristic peaks of the ground truth (QM9), strictly adhering to chemical bond rules and atomic hybridizations.
+
+These results confirm that POETIC successfully learns the underlying physics of molecular geometry. It does not merely optimize a property predictor but generates chemically valid, stable, and realistic 3D structures regardless of the target condition.
+
 
 > Q2: Concerns on Baseline Fairness and Data Splits，
 
