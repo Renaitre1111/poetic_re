@@ -319,8 +319,8 @@ A1: Thank you for your suggestion. We have performed a systematic assessment of 
 
 - **Quantitative Assessment:** Structural Stability & Validity We evaluated standard 3D metrics including Atom Stability, Molecule Stability, Validity, and 3D FCD for molecules generated under each property condition. As shown in the table below, POETIC achieves consistently high performance, with an average Atom Stability of 96.54% and Molecule Stability of 85.15%.
 
-| Condition Property | Atom Stab. (%),Mol Stab. (%),Validity (%),3D FCD ↓ |
-| :--- | :---: | :---: | :---: |
+| Condition Property | Atom Stab. (%) | Mol Stab. (%) | Validity (%) | 3D FCD $\downarrow$ |
+| :--- | :---: | :---: | :---: | :---: |
 | $\alpha$ | 96.92 | 85.88 | 93.59 | 0.38 |
 | $\Delta\epsilon$ | 95.12 | 81.94 | 91.61 | 1.55 |
 | $\epsilon_{\text{HOMO}}$ | 95.84 | 83.75 | 90.99 | 2.24 |
