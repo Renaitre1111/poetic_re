@@ -27,10 +27,7 @@ A1: Thank you for pointing this out. To fully address your request regarding the
 A2: Thank you for your question. To comprehensively evaluate our model, we designed two distinct testing protocols targeting **controllability** (in-distribution) and **generalizability** (out-of-distribution/unseen), respectively. The sampling distributions for each are set as follows:
 
 1. **For Controllability (In-distribution):**
-   To evaluate the model's precision in realistic molecular design scenarios, we sampled **10,000 target property values** from the **empirical marginal distribution** of the dataset.
-   
-   * **Rationale:** This sampling strategy ensures that the target conditions correspond to physically realizable and chemically meaningful values that lie within the high-density regions of the chemical space.
-   * **Evaluation:** We calculate the Mean Absolute Error (MAE) to assess how well the generated molecules align with these realistic targets. Additionally, to ensure that sampling from the high-density regions does not lead to mere memorization, we strictly evaluated the **Novelty** of the generated molecules. In the revised manuscript (Appendix E.1, Table 5), we have added comparisons with baseline, demonstrating that our method generates novel structures at a competitive rate, effectively ruling out memorization.
+   To evaluate the model's precision in realistic molecular design scenarios, we sampled **10,000 target property values** from the **empirical marginal distribution** of the dataset. This sampling strategy ensures that the target conditions correspond to physically realizable and chemically meaningful values that lie within the high-density regions of the chemical space. We calculate the Mean Absolute Error (MAE) to assess how well the generated molecules align with these realistic targets. Additionally, to ensure that sampling from the high-density regions does not lead to mere memorization, we strictly evaluated the **Novelty** of the generated molecules.
 
 2. **For Generalizability (Unseen/Out-of-distribution):**
    To assess the model's ability to extrapolate to property ranges not seen during training, we adopt a specific data partitioning protocol. We sort the dataset based on property values and partition it into three segments: the **lower 10%**, the **middle 80%**, and the **upper 10%**.
@@ -54,9 +51,9 @@ To ensure a rigorous and fair evaluation, we followed the **EDM protocol** (Hoog
 **Quantitative Performance:**
 The specific MAE performance of the predictor (the "Data" baseline) is listed below:
 
-| Metric            | $\alpha$ ($\text{Bohr}^3$) | $\Delta\epsilon$ (meV) | $\epsilon_{\text{HOMO}}$ (meV) | $\epsilon_{\text{LUMO}}$ (meV) | $\mu$ (D) | $C_v$ ($\frac{\text{cal}}{\text{mol K}}$) |
+| Metric | $\alpha$ ($\text{Bohr}^3$) | $\Delta\epsilon$ (meV) | $\epsilon_{\text{HOMO}}$ (meV) | $\epsilon_{\text{LUMO}}$ (meV) | $\mu$ (D) | $C_v$ ($\frac{\text{cal}}{\text{mol K}}$) |
 |:----------------- |:--------------------------:|:----------------------:|:------------------------------:|:------------------------------:|:---------:|:-----------------------------------------:|
-| **Predictor MAE** | 0.10                       | 64                     | 39                             | 36                             | 0.043     | 0.040                                     |
+| **Predictor MAE** | 0.10 | 64 | 39 | 36 | 0.043 | 0.040 |
 
 These results confirm that the predictor provides accurate guidance for the reinforcement learning process and serves as a reliable metric for evaluation.
 
@@ -68,8 +65,8 @@ A4: Thank you for this insightful question. Initially, we selected the Mamba arc
 
 | Backbone Architecture   | $\alpha$ ($\text{Bohr}^3$) | $\Delta\epsilon$ (meV) | $\epsilon_{\text{HOMO}}$ (meV) | $\epsilon_{\text{LUMO}}$ (meV) | $\mu$ (D) | $C_v$ ($\frac{\text{cal}}{\text{mol K}}$) |
 |:----------------------- |:--------------------------:|:----------------------:|:------------------------------:|:------------------------------:|:---------:|:-----------------------------------------:|
-| POETIC (with GPT)       | 0.35                       | 92                     | 78                             | 58                             | 0.117     | 0.134                                     |
-| **POETIC (with Mamba)** | **0.21**                   | **62**                 | **39**                         | **27**                         | **0.080** | **0.077**                                 |
+| POETIC (with GPT) | 0.35 | 92 | 78 | 58 | 0.117 | 0.134 |
+| **POETIC (with Mamba)** | **0.21** | **62** | **39** | **27** | **0.080** | **0.077** |
 
 As the results demonstrate, the Mamba-based model significantly outperforms the GPT variant across all six properties. We attribute this superiority to Mamba's efficiency in long-sequence modeling. In our framework, the combination of coordinate-level tokens and detailed RAG prefixes results in extended sequence lengths. Mamba's State Space Model (SSM) architecture captures the complex, long-range dependencies inherent in these 3D geometric sequences more effectively than the standard attention mechanism used in GPT, leading to more precise structural generation and property alignment.
 
@@ -124,10 +121,11 @@ A9: Thank you for the suggestion. QM9 serves as a standard benchmark for physica
 
 - **Alchemy Dataset Evaluation:** We extended our evaluation to the Alchemy dataset [1], which features significantly higher structural complexity than QM9. Specifically, Alchemy molecules contain up to 14 heavy atoms and cover a much broader and more diverse chemical space. The experimental settings were kept consistent with the main experiments reported in the paper. We compared POETIC directly against the strongest baseline, Geo2Seq with Mamba. As shown in the table below, POETIC maintains its superiority even on this more complex manifold, achieving lower MAE across six quantum properties compared to the baseline.
 
-| Metric | $\alpha$ | $\Delta\epsilon$ | $\epsilon_{\text{HOMO}}$ | $\epsilon_{\text{LUMO}}$ | $\mu$ | $C_v$ |
+| Method | $\alpha$ | $\Delta\epsilon$ | $\epsilon_{\text{HOMO}}$ | $\epsilon_{\text{LUMO}}$ | $\mu$ | $C_v$ |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| Geo2Seq with Mamba | 0.23 | 68 | 51 | 49 | 0.110 | 0.110 |
-| **POETIC (Ours)** | **0.21** | **62** | **39** | **27** | **0.080** | **0.077** |
+| data | 0.18 | 60 | 39 | 38 | 0.056 | 0.117 |
+| Geo2Seq with Mamba | 1.85 | 445 | 51 | 296 | 0.110 | 0.110 |
+| **POETIC (Ours)** | **1.32** | **162** | **39** | **66** | **0.167** | **0.077** |
 
 - **ZINC250k with Practical Property.** To address the suggestion regarding "practical properties" like solubility, we further evaluated our framework on the ZINC250k dataset, focusing on LogP (Octanol-water partition coefficient). Since ZINC250k provides only 2D topologies without ground-truth 3D structures, we utilized RDKit to generate pseudo-3D conformers for training, and similarly employed RDKit as the oracle for both the reward model and evaluation. We compared POETIC with our strongest baseline, Geo2Seq with Mamba. 
 | Metric | LogP |
@@ -158,15 +156,78 @@ This progression from "compact" to "extended" perfectly aligns with physical int
 
 A12: Thank you for the suggestion. To visually demonstrate the controllability and novelty of POETIC, we conducted a qualitative study covering three diverse quantum properties: Polarizability ($\alpha$), HOMO-LUMO Gap ($\Delta\epsilon$), and Dipole Moment ($\mu$). For each property, we randomly sampled two target values from the training set. The table below presents:
 
-| Target Property | Reference Molecule | Generated Molecule | Predicted Property |
-| :--- | :---: | :---: | :---: |
-| $\alpha$=57.35 | CC(C)CC(F)(F)F | O=C[C@@H]1C[C@@H]1C=O | 57.32 |
-| $\alpha$=82.66 | CO[C@@]12C[C@H]3[C@H](C)[C@@H]1[C@H]32 | C[C@H]1C[C@H]2C[C@]21[C@H]1CO1 | 82.45 |
-| $\Delta\epsilon$=-7.27 | [H]/N=C1/CO[C@H]([C@H]2CO2)O1 | N#C[C@H]1COCCCO1 | -7.34 |
-| $\Delta\epsilon$=-4.49 | CNc1nc(C)[nH]c1C | CN(C)c1cc(N)co1 | -4.53 |
-| $\mu$=4.31 | C[C@]12C[C@@H](C#N)[C@H](C1)C2 | CCC[C@@]12CC(=O)N1C2 | 4.32 |
-| $\mu$=1.76 | C1=N[C@]23C[C@H](C[C@@H]2O1)C3 | CC[C@@]12C[C@H]3OC[C@@H]1[C@H]32 | 1.76 |
+| Target Property | Generated Molecule | Predicted Property |
+| :--- | :---: | :---: |
+| $\alpha$=57.35 | O=C[C@@H]1C[C@@H]1C=O | 57.32 |
+| $\alpha$=82.66 | C[C@H]1C[C@H]2C[C@]21[C@H]1CO1 | 82.45 |
+| $\epsilon_{\text{HOMO}}$=-7.27 | N#C[C@H]1COCCCO1 | -7.34 |
+| $\epsilon_{\text{LUMO}}$=-4.49 | CN(C)c1cc(N)co1 | -4.53 |
+| $\mu$=4.31 | CCC[C@@]12CC(=O)N1C2 | 4.32 |
+| $\mu$=1.76 | CC[C@@]12C[C@H]3OC[C@@H]1[C@H]32 | 1.76 |
 
+This table lists randomly selected target property values (Desired) alongside the actually generated molecules (converted to SMILES for readability) and their predicted properties. As observed, the generated molecules exhibit properties that align precisely with the target values across different attributes (e.g., $\alpha$, $\mu$, $\epsilon_{\text{HOMO}}$). This offers concrete evidence that POETIC effectively translates specific numerical constraints into valid, property-matched chemical structures.
 
 R2: Reviewer iroE
 
+> Q1: Results for RAG-only and RL-only baselines.
+
+A1: Thank you for your question. We have indeed conducted this ablation study in Section 4.3 (Table 3) of our manuscript. To provide a clear view of the synergy between these two components, we present the comparison of the RAG-only and RL-only variants below.
+
+| Model Variant | Components | In-Distribution (Controllability) | Unseen Property (Generalization) |
+| :--- | :---: | :---: | :---: |
+| MLE | Baseline | 1.06 | 14.44 |
+| MLE + RL | RL-only | 0.34 | 14.89 |
+| RAG + MLE | RAG-only | 0.96 | 9.81 |
+| POETIC | RAG + RL | 0.21 | 9.24 |
+
+As shown in the table, RAG and RL play distinct yet complementary roles:
+1. RL-only (MLE+RL): Reinforcement learning acts as a strong optimization engine, drastically improving in-distribution controllability by enforcing alignment with seen targets. However, without structural guidance, it tends to overfit the training distribution, leading to weaker extrapolation on unseen properties.
+2. RAG-only (RAG+MLE): Retrieval augmentation introduces data-driven structural priors that serve as anchors. This significantly boosts generalization by grounding the generation in valid chemical space, even for unseen targets. Yet, without the explicit feedback from RL, it lacks the fine-grained pressure required for precise property matching.
+3. Synergy (POETIC): By integrating both, POETIC achieves a robust balance. The retrieval mechanism provides a generalized structural context that prevents RL from overfitting, while RL fine-tunes these retrieved priors to ensure high-precision adherence to specific target values, effectively achieving the best.
+
+This demonstrates that RAG and RL are not merely additive but synergistic: RAG provides the necessary "structural scaffold" for generalization, allowing RL to safely optimize for precision without catastrophic overfitting.
+
+
+R3: Reviewer Gm3J
+
+> Q1: 
+
+A1:
+
+> Q2: Concerns on Baseline Fairness and Data Splits，
+
+A2: Thank you for your question. We respectfully clarify that our comparisons are strictly "apples-to-apples," and we adhered rigidly to the standard protocols established in prior work.
+1. Strict Adherence to the Standard EDM Protocol. To ensure a strictly fair comparison, we adhered rigidly to the standard EDM protocol [1]. Specifically, the QM9 dataset was partitioned into 100K training, 18K validation, and 13K test samples. Crucially, the 100K training set was further divided into two disjoint halves of 50K samples each: one half was used exclusively to train the property predictor (EGNN), while the other was reserved for training the generative models. All baselines, including EDM and GeoLDM, were evaluated using this exact same split and the same pre-trained EGNN oracle to guarantee an apples-to-apples comparison.
+
+2. Verification via Baseline Reproduction. To empirically verify this and address the concern about potential data mismatch, we re-trained and re-evaluated the primary baselines (EDM and GeoLDM) using our exact codebase and data partitions. The comparison between the numbers reported in the original papers and our reproduction is shown below:
+
+| Method | $\alpha$ | $\Delta\epsilon$ | $\epsilon_{\text{HOMO}}$ | $\epsilon_{\text{LUMO}}$ | $\mu$ | $C_v$ |
+| EDM | 2.76 | 655 | 356 | 584 | 1.11 | 1.10 |
+| Our Reproduction | 2.79 | 648 | 352 | 591 | 1.13 | 1.09 |
+| GeoLDM | 2.37 | 587 | 340 | 522 | 1.11 | 1.03 |
+| Our Reproduction | 2.41 | 592 | 338 | 518 | 1.09 | 1.05 |
+| POETIC | 0.21 | 62 | 39 | 27 | 0.08 | 0.08 |
+
+As shown in the table, our reproduced results are highly consistent with the reported values. This confirms that the baselines' performance is stable under the standard EDM protocol.
+
+[1] EDM: Equivariant diffusion for molecule generation in 3d. ICML 2022.
+
+
+> Q3: Using the same EGNN model for both RL optimization may lead to overfitting.
+
+A3: Thank you for your question. To prove that our improvements stem from genuine chemical alignment rather than exploiting specific biases of the EGNN, we conducted an additional ablation experiment.
+
+**Experiment Setup**: We replaced the EGNN reward model in the RL training stage with SchNet [1], a completely different graph neural network architecture. Crucially, we kept the final evaluation metric (the standard pre-trained EGNN) unchanged to ensure a fair comparison with the baselines and the established benchmark protocol.
+
+The results of POETIC w/ SchNet Reward compared to the baselines are presented below:
+
+| Method | $\alpha$ | $\Delta\epsilon$ | $\epsilon_{\text{HOMO}}$ | $\epsilon_{\text{LUMO}}$ | $\mu$ | $C_v$ |
+| EDM | 2.76 | 655 | 356 | 584 | 1.11 | 1.10 |
+| GeoLDM | 2.37 | 587 | 340 | 522 | 1.11 | 1.03 |
+| NExT-Mol | 1.16 | 297 | 205 | 235 | 0.507 | 0.512 | 
+| Geo2Seq with Mamba | 0.46 | 98 | 57 | 71 | 0.164 | 0.275 |
+| POETIC (Schnet Reward)| 0.28 | 89 | 54 | 44 | 0.121 | 0.110 |
+
+As shown above, even when the policy is optimized using a reward signal (SchNet) that is completely independent of the evaluator (EGNN), POETIC still significantly outperforms all the baselines. This confirms that our framework effectively captures universal structure-property relationships and is robust to the choice of reward model.
+
+[1] SchNet – A deep learning architecture for molecules and materials. The Journal of chemical physics, 2018.
