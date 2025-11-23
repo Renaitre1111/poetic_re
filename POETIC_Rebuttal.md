@@ -269,7 +269,7 @@ A8: Thank you for your question. we partitioned the QM9 training set (100K) into
 
 > Q9: Have you visualized or analyzed the embedding-space trajectory to illustrate how generated molecules evolve toward target properties?
 
-A9: Thank you for your insightful suggestion. We have performed the requested visualization to illustrate the impact of RL on the model's latent space. In Appendix F (Figure 6) of the revised PDF, we compare the embedding spaces of the MLE baseline and our POETIC model using PCA projection. Specifically, we sampled 100 conditions for the HOMO-LUMO gap property and extracted the final hidden states of the generated molecules.
+A9: Thank you for your insightful suggestion. We have performed the requested visualization to illustrate the impact of RL on the model's latent space. In Appendix G (Figure 6) of the revised PDF, we compare the embedding spaces of the MLE baseline and our POETIC model using PCA projection. Specifically, we sampled 100 conditions for the HOMO-LUMO gap property and extracted the final hidden states of the generated molecules.
 As illustrated in Figure 6:
 - MLE Baseline (Left): The latent space appears disordered, with high-value (yellow) and low-value (purple) samples intermixed randomly. This indicates that the supervised baseline struggles to encode continuous property magnitudes in its representation.
 - POETIC (Right): After property-aware RL fine-tuning, a structured property manifold emerges. We observe a clear separation and gradient where molecules are clustered by their property values (e.g., low-value samples distinct from high-value ones).
